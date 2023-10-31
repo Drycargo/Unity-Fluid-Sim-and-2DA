@@ -1,0 +1,45 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float2> OutputVel;
+
+Texture2D<float4> Input;
+
+float FORCE_AMP;
+static const float BLUR[9] = {
+1.000000000000, 0.367879441171, 0.0183156388887,
+0.367879441171, 0.135335283237, 0.00673794699909,
+0.0183156388887, 0.00673794699909, 0.000335462627903};
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if (Input[id.xy].a <= 0.0000000001)
+        return;
+
+    int2 dim;
+    OutputVel.GetDimensions(dim.x, dim.y);
+
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+            if (i == 0 && j == 0)
+                continue;
+
+            float2 newCoord = id.xy + int2(i, j);
+
+            if (newCoord.x <= 0 || newCoord.y <= 0 || newCoord.x >= (dim.x - 1) || newCoord.y >= (dim.y -1)) {
+                continue;
+            }
+
+            float2 dir = float2(i, j);
+            dir /= length(dir);
+            float blurAmount = BLUR[abs(i) + abs(j) * 3];
+
+            OutputVel[newCoord] += (blurAmount * FORCE_AMP * dir);
+        }
+    }
+
+    //OutputVel[id.xy] = float2(id.x & id.y, (id.x & 15)/15.0);
+}

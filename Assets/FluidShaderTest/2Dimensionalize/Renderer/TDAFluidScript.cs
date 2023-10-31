@@ -48,12 +48,13 @@ public class TDAFluidScript : MonoBehaviour
 
     // RT
     private RenderTexture velRT0;
-
     private RenderTexture velRT1;
     private RenderTexture velRT2;
 
     private RenderTexture pressureRT0;
     private RenderTexture pressureRT1;
+    private RenderTexture potentialRT0;
+    private RenderTexture potentialRT1;
     private RenderTexture velDivRT0;
     private RenderTexture velCurlRT0;
 
@@ -70,6 +71,8 @@ public class TDAFluidScript : MonoBehaviour
     private int projectSetupKernel;
     private int curlKernel;
     private int vorticityKernel;
+    private int potentialBlurKernel;
+    private int potentialUpdateKernel;
 
     void Start()
     {
@@ -86,6 +89,7 @@ public class TDAFluidScript : MonoBehaviour
         float dx = 1.0f / resY;
 
         currentShader.SetFloat("DELTA_T", dt);
+        capturedShader.SetFloat("DELTA_T", dt);
         currentShader.SetFloat("worldTime", Time.time);
 
         // Start Operation
@@ -102,14 +106,25 @@ public class TDAFluidScript : MonoBehaviour
         // --linear solve
         linsolve(diffuse2DKernel, "Diff2DSrc", "Diff2DDest", velRT1, velRT2);
 
+        // Blur Potential:
+        // Potential0 --Blur--> Potential1
+        capturedShader.Dispatch(potentialBlurKernel, threadCountX, threadCountY, 1);
+
+        // Update Potential:
+        // Vel1 + capturedTex + Potential1 --Update--> Potential0
+        capturedShader.Dispatch(potentialUpdateKernel, threadCountX, threadCountY, 1);
+
         // TEMP FORCE
         // Vel1 --Force--> Vel2
+        /*
         Vector3 colliderPos = colliders[0].transform.position;
         Vector3 scale = transform.localScale * 10f;
         Vector2 input = new Vector2(colliderPos.x/scale.x, colliderPos.z/scale.z);
         currentShader.SetVector("forcePos", input);
         currentShader.SetVector("forceVector", input - previousPos);
         currentShader.Dispatch(forceKernel, threadCountX, threadCountY, 1);
+        */
+        Graphics.CopyTexture(velRT1, velRT2);
 
         // Curl
         // Vel2 --Curl--> vCurl0
@@ -135,11 +150,12 @@ public class TDAFluidScript : MonoBehaviour
         // -- Vel1 + vDiv0 --Project--> Vel0
         currentShader.Dispatch(projectKernel, threadCountX, threadCountY, 1);
 
+        /*
         // Draw on material
         Graphics.CopyTexture(colorRT0, colorRT2);
 
         // Diffuse Color
-        /*
+
         currentMaterial.SetFloat("DIFF_A", diffuseA);
         currentMaterial.SetFloat("DIFF_B", 4 + diffuseA);
         currentMaterial.SetTexture("_OrigTex", colorRT2);
@@ -158,7 +174,7 @@ public class TDAFluidScript : MonoBehaviour
         colorRT0 = temp;
 
         targetMaterial.SetTexture("_MainTex", colorRT0);
-        previousPos = input;
+        //previousPos = input;
     }
 
     void OnRenderImage(RenderTexture src, RenderTexture dest) {
@@ -171,6 +187,8 @@ public class TDAFluidScript : MonoBehaviour
         Destroy(velRT2);
         Destroy(pressureRT0);
         Destroy(pressureRT1);
+        Destroy(potentialRT0);
+        Destroy(potentialRT1);
         Destroy(velDivRT0);
         Destroy(velCurlRT0);
         Destroy(colorRT0);
@@ -198,6 +216,9 @@ public class TDAFluidScript : MonoBehaviour
         pressureRT0 = CreateRT(1, resX, resY);
         pressureRT1 = CreateRT(1, resX, resY);
 
+        potentialRT0 = CreateRT(1, resX, resY);
+        potentialRT1 = CreateRT(1, resX, resY);
+
         velDivRT0 = CreateRT(1, resX, resY);
         velCurlRT0 = CreateRT(1, resX, resY);
 
@@ -216,6 +237,9 @@ public class TDAFluidScript : MonoBehaviour
         curlKernel = currentShader.FindKernel("Curl");
         vorticityKernel = currentShader.FindKernel("Vorticity");
 
+        potentialBlurKernel = capturedShader.FindKernel("BlurPotential");
+        potentialUpdateKernel = capturedShader.FindKernel("AdvectAndUpdatePotential");
+
         // Set inputs and outputs
 
         // Vel0 --Advect--> Vel1
@@ -225,6 +249,16 @@ public class TDAFluidScript : MonoBehaviour
         // _ + Vel0 --Diffuse--> _
         // -- 1 + 0 -> 2; 2 + 0 -> 1
         currentShader.SetTexture(diffuse2DKernel, "Diff2DOrigSrc", velRT0);
+
+        // Potential0 --Blur--> Potential1
+        capturedShader.SetTexture(potentialBlurKernel, "InputPotential", potentialRT0);
+        capturedShader.SetTexture(potentialBlurKernel, "OutputPotential", potentialRT1);
+
+        // Vel1 + capturedTex + Potential1 --Update--> Potential0
+        capturedShader.SetTexture(potentialUpdateKernel, "VelSrc", velRT1);
+        capturedShader.SetTexture(potentialUpdateKernel, "ColorTex", capturedTex);
+        capturedShader.SetTexture(potentialUpdateKernel, "InputPotential", potentialRT1);
+        capturedShader.SetTexture(potentialUpdateKernel, "OutputPotential", potentialRT0);
 
         // Vel1 --Force--> Vel2
         currentShader.SetTexture(forceKernel, "AdvectOutSrc", velRT1);
@@ -257,7 +291,15 @@ public class TDAFluidScript : MonoBehaviour
         currentShader.SetFloat("CURL", vorticity);
         currentShader.SetFloat("FORCE_DECAY", 75);
         currentShader.SetFloat("FORCE_AMPLITUDE", 5);
+
+        capturedShader.SetInt("sampleStep", 1);
+        capturedShader.SetInt("sampleRadius", 2);
+        capturedShader.SetFloat("transparencyThreshold", 0.0000001f);
+        capturedShader.SetFloat("potentialIncrement", 1f);
+        capturedShader.SetFloat("potentialDecay", 0.9f);
+
         currentMaterial.SetTexture("_VelocityField", velRT0);
+        currentMaterial.SetTexture("_PotentialField", potentialRT0);
     }
 
     private RenderTexture CreateRT(int pixelDimension, int width = -1, int height = -1) {

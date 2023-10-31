@@ -1,19 +1,61 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel AddPotential
+#pragma kernel BlurPotential
+#pragma kernel AdvectAndUpdatePotential
 
-
-// Add Potential
-Texture2D<float4> InputTex;
+Texture2D<float4> ColorTex;
+Texture2D<float2> VelSrc;
+Texture2D<float> InputPotential;
 RWTexture2D<float> OutputPotential;
 
 int sampleStep;
-int sampleWidth
+int sampleRadius;
+float transparencyThreshold;
+float potentialIncrement;
+float potentialDecay;
+float DELTA_T;
+
+static const float GAUSSIAN_BLUR[9] = {
+0.398942, 0.241971, 0.053991,
+0.241971, 0.146762, 0.032747,
+0.053991, 0.032747, 0.007306};
 
 [numthreads(8,8,1)]
-void AddPotential (uint2 id : SV_DispatchThreadID)
+void BlurPotential(uint2 id : SV_DispatchThreadID)
 {
-    if (InputTex[id].a <= 0.0000000001)
-        return;
+    // Blur current potential
+    float newPotential = 0;
 
-    OutputPotential[id] += InputTex[id].a;
+    for (int i = -sampleRadius; i <= sampleRadius; i+= sampleStep) {
+        for (int j = -sampleRadius; j <= sampleRadius; j+= sampleStep) {
+            newPotential += 
+                GAUSSIAN_BLUR[abs(i) + abs(j) * (2 * sampleRadius + 1)] * InputPotential[id];
+        }
+    }
+
+    OutputPotential[id] = newPotential * potentialDecay;
+}
+
+[numthreads(8,8,1)]
+void AdvectAndUpdatePotential(uint2 id : SV_DispatchThreadID)
+{
+    uint2 outputDim;
+    OutputPotential.GetDimensions(outputDim.x, outputDim.y);
+
+    // Normalize
+    float2 currentUV = (id + 0.5) / outputDim;
+    float2 displacement = VelSrc[id] * float2((float)outputDim.y/outputDim.x, 1) * DELTA_T;
+    float2 rawPos = (currentUV - displacement) * outputDim;
+    float2 upperLeftPos = floor(rawPos);
+    float2 distFromUpperLeft = rawPos - upperLeftPos;
+
+    float valUpper = lerp(
+            InputPotential[upperLeftPos],
+            InputPotential[upperLeftPos + int2(1, 0)], 1.0 - distFromUpperLeft.x);
+    float valLower = lerp(
+            InputPotential[upperLeftPos + int2(0, 1)], 
+            InputPotential[upperLeftPos + int2(1, 1)], 1.0 - distFromUpperLeft.x);
+
+    OutputPotential[id] = 
+        lerp(valUpper, valLower, 1.0 - distFromUpperLeft.y) +
+        potentialIncrement * (ColorTex[id].a <= transparencyThreshold ? 0 : 1);
 }

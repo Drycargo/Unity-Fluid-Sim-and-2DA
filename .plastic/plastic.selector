@@ -1,4 +1,0 @@
-repository "ComputeShader@drycargo-htf@cloud.cn"
-  path "/"
-    br "/main"
-    co "/main"

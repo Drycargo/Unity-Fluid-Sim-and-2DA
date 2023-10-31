@@ -1,0 +1,19 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel AddPotential
+
+
+// Add Potential
+Texture2D<float4> InputTex;
+RWTexture2D<float> OutputPotential;
+
+int sampleStep;
+int sampleWidth
+
+[numthreads(8,8,1)]
+void AddPotential (uint2 id : SV_DispatchThreadID)
+{
+    if (InputTex[id].a <= 0.0000000001)
+        return;
+
+    OutputPotential[id] += InputTex[id].a;
+}

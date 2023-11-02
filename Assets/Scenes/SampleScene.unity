@@ -439,8 +439,8 @@ Transform:
   m_GameObject: {fileID: 708658539}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.68, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.1, y: 1.9, z: -0.4}
+  m_LocalScale: {x: 2, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -601,7 +601,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 0}
+  m_BackGroundColor: {r: 0.3773585, g: 0.3773585, b: 0.3773585, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -908,14 +908,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2327516878060158837, guid: b99f7583be4ddb343987c10f9927d50d, type: 3}
-      propertyPath: far clip plane
-      value: 43.30127
-      objectReference: {fileID: 0}
-    - target: {fileID: 2327516878060158837, guid: b99f7583be4ddb343987c10f9927d50d, type: 3}
-      propertyPath: near clip plane
-      value: 43.10127
-      objectReference: {fileID: 0}
     - target: {fileID: 5083919236836273905, guid: b99f7583be4ddb343987c10f9927d50d, type: 3}
       propertyPath: projectionPlane
       value: 
@@ -934,7 +926,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8476131462495278131, guid: b99f7583be4ddb343987c10f9927d50d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 8476131462495278131, guid: b99f7583be4ddb343987c10f9927d50d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1058,6 +1050,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: TDAPlane
       objectReference: {fileID: 0}
+    - target: {fileID: 1714616344289171157, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214982989113454268, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
+      propertyPath: m_LocalScale.z
+      value: -5
+      objectReference: {fileID: 0}
     - target: {fileID: 4214982989113454268, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1096,6 +1096,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4214982989113454268, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214982989113454268, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5001402672796389843, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}

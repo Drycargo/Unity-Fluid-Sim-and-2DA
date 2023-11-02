@@ -4,8 +4,8 @@ Shader "Unlit/TDAFluidColorShader"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _OrigTex ("Orig Texture", 2D) = "white" {}
+        _CapTex ("Captured Texture", 2D) = "white" {}
         _VelocityField ("Velocity Field", 2D) = "" {}
-        _PotentialField ("Potential Field", 2D) = "" {}
     }
 
     CGINCLUDE
@@ -28,9 +28,11 @@ Shader "Unlit/TDAFluidColorShader"
     float4 _MainTex_ST;
     float4 _MainTex_TexelSize;
     sampler2D _OrigTex;
+    sampler2D _CapTex;
+    float4 _CapTex_ST;
+    float4 _CapTex_TexelSize;
 
     sampler2D _VelocityField;
-    sampler2D _PotentialField;
 
     float DIFF_A;
     float DIFF_B;
@@ -62,14 +64,15 @@ Shader "Unlit/TDAFluidColorShader"
         float DELTA_T = unity_DeltaTime.x;
 
         float2 normToAspect = float2(_MainTex_TexelSize.x/ _MainTex_TexelSize.y , 1);
-        /*
+
         float2 disp = tex2D(_VelocityField, i.uv).xy * normToAspect * DELTA_T;
 
         fixed4 col = tex2D(_MainTex, (i.uv - disp));
 
-        return col;
-        */
-        return fixed4(tex2D(_PotentialField, i.uv).xy * normToAspect, 0, 1);
+        fixed4 capturedColor = tex2D(_CapTex, i.uv);
+        return lerp(col, capturedColor, capturedColor.a);
+        
+        //return fixed4(tex2D(_VelocityField, i.uv).xy * normToAspect, 0, 1);
     }
 
     ENDCG

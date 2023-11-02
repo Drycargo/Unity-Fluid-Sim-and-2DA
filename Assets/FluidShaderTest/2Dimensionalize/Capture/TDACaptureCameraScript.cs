@@ -18,7 +18,7 @@ public class TDACaptureCameraScript : MonoBehaviour
 
         thisCam.fieldOfView = 2 * halfFoV;
 
-        float halfPlaneWidth = projectionPlane.transform.localScale.z * PLANE_DEFAULT_DIMENSION * 0.5f;
+        float halfPlaneWidth = Math.Abs(projectionPlane.transform.localScale.z) * PLANE_DEFAULT_DIMENSION * 0.5f;
 
         thisCam.farClipPlane = halfPlaneWidth / (float)Math.Tan(halfFoV * Mathf.Deg2Rad);
         thisCam.nearClipPlane = thisCam.farClipPlane - thickness;

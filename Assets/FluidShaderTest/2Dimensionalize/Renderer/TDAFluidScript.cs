@@ -119,13 +119,12 @@ public class TDAFluidScript : MonoBehaviour
         /*
         Vector3 colliderPos = colliders[0].transform.position;
         Vector3 scale = transform.localScale * 10f;
-        Vector2 input = new Vector2(colliderPos.x/scale.x, colliderPos.z/scale.z);
+        Vector2 input = new Vector2(colliderPos.x/scale.x, -colliderPos.z/scale.z);
         currentShader.SetVector("forcePos", input);
         currentShader.SetVector("forceVector", input - previousPos);
-        currentShader.Dispatch(forceKernel, threadCountX, threadCountY, 1);
         */
-        Graphics.CopyTexture(velRT1, velRT2);
-
+        currentShader.Dispatch(forceKernel, threadCountX, threadCountY, 1);
+        
         // Curl
         // Vel2 --Curl--> vCurl0
         currentShader.Dispatch(curlKernel, threadCountX, threadCountY, 1);
@@ -173,8 +172,6 @@ public class TDAFluidScript : MonoBehaviour
         colorRT1 = colorRT0;
         colorRT0 = temp;
 
-        targetMaterial.SetTexture("_MainTex", colorRT0);
-        //previousPos = input;
     }
 
     void OnRenderImage(RenderTexture src, RenderTexture dest) {
@@ -263,6 +260,7 @@ public class TDAFluidScript : MonoBehaviour
         // Vel1 --Force--> Vel2
         currentShader.SetTexture(forceKernel, "AdvectOutSrc", velRT1);
         currentShader.SetTexture(forceKernel, "AdvectOutDest", velRT2);
+        currentShader.SetTexture(forceKernel, "Potential", potentialRT0);
 
         // Vel2 --Curl--> vCurl0
         currentShader.SetTexture(curlKernel, "AdvectOutSrc", velRT2);
@@ -290,16 +288,18 @@ public class TDAFluidScript : MonoBehaviour
 
         currentShader.SetFloat("CURL", vorticity);
         currentShader.SetFloat("FORCE_DECAY", 75);
-        currentShader.SetFloat("FORCE_AMPLITUDE", 5);
+        currentShader.SetFloat("FORCE_AMPLITUDE", 2.5f);
 
         capturedShader.SetInt("sampleStep", 1);
         capturedShader.SetInt("sampleRadius", 2);
         capturedShader.SetFloat("transparencyThreshold", 0.0000001f);
         capturedShader.SetFloat("potentialIncrement", 1f);
-        capturedShader.SetFloat("potentialDecay", 0.9f);
+        capturedShader.SetFloat("potentialDecay", 0.8f);
 
         currentMaterial.SetTexture("_VelocityField", velRT0);
-        currentMaterial.SetTexture("_PotentialField", potentialRT0);
+        currentMaterial.SetTexture("_CapTex", capturedTex);
+
+        targetMaterial.SetTexture("_MainTex", colorRT0);
     }
 
     private RenderTexture CreateRT(int pixelDimension, int width = -1, int height = -1) {

@@ -28,7 +28,7 @@ void BlurPotential(uint2 id : SV_DispatchThreadID)
     for (int i = -sampleRadius; i <= sampleRadius; i+= sampleStep) {
         for (int j = -sampleRadius; j <= sampleRadius; j+= sampleStep) {
             newPotential += 
-                GAUSSIAN_BLUR[abs(i) + abs(j) * (2 * sampleRadius + 1)] * InputPotential[id];
+                GAUSSIAN_BLUR[abs(i) + abs(j) * (2 * sampleRadius + 1)] * InputPotential[id + int2(i, j)];
         }
     }
 
@@ -41,6 +41,9 @@ void AdvectAndUpdatePotential(uint2 id : SV_DispatchThreadID)
     uint2 outputDim;
     OutputPotential.GetDimensions(outputDim.x, outputDim.y);
 
+    uint2 inputDim;
+    ColorTex.GetDimensions(inputDim.x, inputDim.y);
+
     // Normalize
     float2 currentUV = (id + 0.5) / outputDim;
     float2 displacement = VelSrc[id] * float2((float)outputDim.y/outputDim.x, 1) * DELTA_T;
@@ -49,13 +52,13 @@ void AdvectAndUpdatePotential(uint2 id : SV_DispatchThreadID)
     float2 distFromUpperLeft = rawPos - upperLeftPos;
 
     float valUpper = lerp(
-            InputPotential[upperLeftPos],
-            InputPotential[upperLeftPos + int2(1, 0)], 1.0 - distFromUpperLeft.x);
+            InputPotential[upperLeftPos * outputDim],
+            InputPotential[(upperLeftPos + int2(1, 0)) * outputDim], 1.0 - distFromUpperLeft.x);
     float valLower = lerp(
-            InputPotential[upperLeftPos + int2(0, 1)], 
-            InputPotential[upperLeftPos + int2(1, 1)], 1.0 - distFromUpperLeft.x);
+            InputPotential[(upperLeftPos + int2(0, 1)) * outputDim], 
+            InputPotential[(upperLeftPos + int2(1, 1)) * outputDim], 1.0 - distFromUpperLeft.x);
 
     OutputPotential[id] = 
         lerp(valUpper, valLower, 1.0 - distFromUpperLeft.y) +
-        potentialIncrement * (ColorTex[id].a <= transparencyThreshold ? 0 : 1);
+        potentialIncrement * (ColorTex[((float2)id) / outputDim * inputDim].a <= transparencyThreshold ? 0 : 1);
 }

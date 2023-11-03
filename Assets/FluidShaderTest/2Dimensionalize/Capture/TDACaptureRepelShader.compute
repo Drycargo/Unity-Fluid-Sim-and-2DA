@@ -10,7 +10,7 @@ RWTexture2D<float> OutputPotential;
 int sampleStep;
 int sampleRadius;
 float transparencyThreshold;
-float potentialIncrement;
+float2 potentialIncrementRange;
 float potentialDecay;
 float DELTA_T;
 
@@ -58,7 +58,11 @@ void AdvectAndUpdatePotential(uint2 id : SV_DispatchThreadID)
             InputPotential[(upperLeftPos + int2(0, 1)) * outputDim], 
             InputPotential[(upperLeftPos + int2(1, 1)) * outputDim], 1.0 - distFromUpperLeft.x);
 
-    OutputPotential[id] = 
-        lerp(valUpper, valLower, 1.0 - distFromUpperLeft.y) +
-        potentialIncrement * (ColorTex[((float2)id) / outputDim * inputDim].a <= transparencyThreshold ? 0 : 1);
+    OutputPotential[id] = lerp(valUpper, valLower, 1.0 - distFromUpperLeft.y);
+    
+    float4 capturedColor = ColorTex[((float2)id) / outputDim * inputDim];
+    if (capturedColor.a > transparencyThreshold) {
+        float brightness = 0.3 * capturedColor.r + 0.6 * capturedColor.g + capturedColor.b * 0.1;
+        OutputPotential[id] += lerp(potentialIncrementRange[0], potentialIncrementRange[1], brightness);
+    }
 }

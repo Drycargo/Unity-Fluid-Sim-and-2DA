@@ -293,7 +293,7 @@ public class TDAFluidScript : MonoBehaviour
         capturedShader.SetInt("sampleStep", 1);
         capturedShader.SetInt("sampleRadius", 2);
         capturedShader.SetFloat("transparencyThreshold", 0.0000001f);
-        capturedShader.SetFloat("potentialIncrement", 1f);
+        capturedShader.SetVector("potentialIncrementRange", new Vector2(0.6f, 1.0f));
         capturedShader.SetFloat("potentialDecay", 0.8f);
 
         currentMaterial.SetTexture("_VelocityField", velRT0);

@@ -12,6 +12,8 @@ public class TDAFluidScript : MonoBehaviour
     // Resolution & threads
     public int resolution = 2048;
 
+    public bool diffuseColor = false;
+
     public int threadCountX {
         get {return (resolution + 7) / 8;}
     }
@@ -43,8 +45,6 @@ public class TDAFluidScript : MonoBehaviour
     public float viscosity = 1e-6f;
     public int linSolveIteration = 20;
     public float vorticity = 15f;
-
-    private Vector2 previousPos = Vector2.zero;
 
     // RT
     private RenderTexture velRT0;
@@ -149,21 +149,23 @@ public class TDAFluidScript : MonoBehaviour
         // -- Vel1 + vDiv0 --Project--> Vel0
         currentShader.Dispatch(projectKernel, threadCountX, threadCountY, 1);
 
-        /*
-        // Draw on material
-        Graphics.CopyTexture(colorRT0, colorRT2);
+        if (diffuseColor) {
+            // Draw on material
+            Graphics.CopyTexture(colorRT0, colorRT2);
 
-        // Diffuse Color
+            // Diffuse Color
+            currentMaterial.SetFloat("DIFF_A", diffuseA);
+            currentMaterial.SetFloat("DIFF_B", 4 + diffuseA);
+            /*
+            currentMaterial.SetFloat("DIFF_A", diffuseA);
+            currentMaterial.SetFloat("DIFF_B", 4 + diffuseA);
+            */
 
-        currentMaterial.SetFloat("DIFF_A", diffuseA);
-        currentMaterial.SetFloat("DIFF_B", 4 + diffuseA);
-        currentMaterial.SetTexture("_OrigTex", colorRT2);
-
-        for (int i = 0; i < linSolveIteration; i++) {
-            Graphics.Blit(colorRT0, colorRT1, currentMaterial, 0);
-            Graphics.Blit(colorRT1, colorRT0, currentMaterial, 0);
+            for (int i = 0; i < linSolveIteration; i++) {
+                Graphics.Blit(colorRT0, colorRT1, currentMaterial, 0);
+                Graphics.Blit(colorRT1, colorRT0, currentMaterial, 0);
+            }
         }
-        */
 
         // Advect Color
         Graphics.Blit(colorRT0, colorRT1, currentMaterial, 1);
@@ -296,6 +298,7 @@ public class TDAFluidScript : MonoBehaviour
         capturedShader.SetVector("potentialIncrementRange", new Vector2(0.6f, 1.0f));
         capturedShader.SetFloat("potentialDecay", 0.8f);
 
+        currentMaterial.SetTexture("_OrigTex", colorRT2);
         currentMaterial.SetTexture("_VelocityField", velRT0);
         currentMaterial.SetTexture("_CapTex", capturedTex);
 

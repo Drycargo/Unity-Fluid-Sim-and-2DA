@@ -49,12 +49,15 @@ Shader "Unlit/TDAFluidColorShader"
     fixed4 frag_diffuse (v2f i) : SV_Target
     {
         float2 sizeAdjust = _MainTex_TexelSize.zw;
+        
         fixed4 col = (
-            tex2D(_MainTex, i.uv - sizeAdjust * float2(1, 0)) + 
+            (tex2D(_MainTex, i.uv - sizeAdjust * float2(1, 0)) + 
             tex2D(_MainTex, i.uv + sizeAdjust * float2(1, 0)) +
             tex2D(_MainTex, i.uv - sizeAdjust * float2(0, 1)) + 
-            tex2D(_MainTex, i.uv + sizeAdjust * float2(0, 1)) +
-            tex2D(_OrigTex, i.uv) * DIFF_A) / DIFF_B;
+            tex2D(_MainTex, i.uv + sizeAdjust * float2(0, 1))) +
+            tex2D(_OrigTex, i.uv) * 1000) / 1004;
+            //tex2D(_OrigTex, i.uv) * DIFF_A) / DIFF_B;
+        
 
         return col;
     }

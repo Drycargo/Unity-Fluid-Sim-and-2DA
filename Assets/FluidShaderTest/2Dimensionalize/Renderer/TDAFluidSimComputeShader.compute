@@ -82,15 +82,6 @@ void Advect (uint2 id : SV_DispatchThreadID)
 [numthreads(8,8,1)]
 void Force (uint2 id : SV_DispatchThreadID)
 {
-/*
-    uint2 dim;
-    AdvectOutDest.GetDimensions(dim.x, dim.y);
-
-    float2 pos = (id + 0.5)/dim - 0.5;
-    float amp = exp(-FORCE_DECAY * distance(forcePos, pos)) * FORCE_AMPLITUDE;
-
-    AdvectOutDest[id] = AdvectOutSrc[id] + forceVector * amp;
-*/
     float2 potentialDiff = float2(
         Potential[id - uint2(1, 0)] - Potential[id + uint2(1, 0)],
         Potential[id - uint2(0, 1)] - Potential[id + uint2(0, 1)]);

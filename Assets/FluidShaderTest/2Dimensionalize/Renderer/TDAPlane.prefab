@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 5, y: 5, z: -5}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
@@ -119,13 +119,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 219ff14eb69e31b4f87baaea3fb30d05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 1024
-  initialTex: {fileID: 2800000, guid: d3c6df423f2b23c40b2208c3fe7bcce8, type: 3}
+  resolution: 2048
+  initialTex: {fileID: 0}
+  capturedTex: {fileID: 8400000, guid: 3a66dd8ae5761624eb421fb093b82edd, type: 2}
   currentShader: {fileID: 7200000, guid: 1d1185dd890344d468ef76af39e34ab2, type: 3}
+  capturedShader: {fileID: 7200000, guid: 316115793842da94e9a28e70f70508ae, type: 3}
   currentMaterial: {fileID: 2100000, guid: be738d8adbd681943a6f486bed0322b1, type: 2}
   targetMaterial: {fileID: 2100000, guid: 1b4f54422e875e945bbd8d979703aa60, type: 2}
   colliders:
   - {fileID: 0}
   viscosity: 0.000001
   linSolveIteration: 20
-  vorticity: 15
+  vorticity: 20

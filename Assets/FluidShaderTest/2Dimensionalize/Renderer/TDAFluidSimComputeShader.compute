@@ -38,10 +38,9 @@ Texture2D<float2> Diff2DOrigSrc;
 RWTexture2D<float2> Diff2DDest;
 
 // Force
-float FORCE_DECAY;
 float FORCE_AMPLITUDE;
-float2 forcePos;
-float2 forceVector;
+float2 forceRange;
+Texture2D<float4> CapturedTex;
 Texture2D<float> Potential;
 
 
@@ -79,13 +78,50 @@ void Advect (uint2 id : SV_DispatchThreadID)
     AdvectOutDest[id] = lerp(valUpper, valLower, 1.0 - distFromUpperLeft.y);
 }
 
+float hueFromRGB(float r, float g, float b) {
+    float minC = min(min(r, g), b);
+    float maxC = max(max(r, g), b);
+    
+    if (minC == maxC)
+        return 0;
+    
+    float diff = maxC - minC;
+
+    float hue = 0;
+    if (maxC == r) {
+        hue = (g - b)/diff;
+    } else if (maxC == g) {
+        hue = 2 + (b - r)/diff;
+    } else {
+        hue = 4 + (r - g)/diff;
+    }
+
+    hue /= 6.0;
+    if (hue < 0)
+        hue++;
+
+    return hue;
+}
+
 [numthreads(8,8,1)]
 void Force (uint2 id : SV_DispatchThreadID)
 {
+    uint2 outputDim;
+    AdvectOutDest.GetDimensions(outputDim.x, outputDim.y);
+
+    uint2 inputDim;
+    CapturedTex.GetDimensions(inputDim.x, inputDim.y);
+
     float2 potentialDiff = float2(
         Potential[id - uint2(1, 0)] - Potential[id + uint2(1, 0)],
         Potential[id - uint2(0, 1)] - Potential[id + uint2(0, 1)]);
-    AdvectOutDest[id] = AdvectOutSrc[id] + potentialDiff * FORCE_AMPLITUDE;
+
+    float4 capturedColor = CapturedTex[((float2)id) / outputDim * inputDim];
+    float hue = hueFromRGB(capturedColor.r, capturedColor.g, capturedColor.b);
+
+    AdvectOutDest[id] = AdvectOutSrc[id] 
+        + potentialDiff * FORCE_AMPLITUDE * lerp(forceRange.x, forceRange.y, hue) 
+        / (length(AdvectOutSrc[id]) + 1) * DELTA_T;
 }
 
 [numthreads(8,8,1)]

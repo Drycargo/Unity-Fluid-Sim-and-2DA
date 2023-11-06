@@ -478,7 +478,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 2000
-  SPEED_MAX: 2.5
+  SPEED_MAX: 1
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,13 +698,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 708658539}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3420201, y: 0, z: 0, w: 0.9396927}
-  m_LocalPosition: {x: 0.1, y: 7.21, z: -0.4}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.1, y: -32.6, z: -0.4}
+  m_LocalScale: {x: 5, y: 35, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 40, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &708658544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1129,6 +1129,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Earth
       objectReference: {fileID: 0}
+    - target: {fileID: 1733945558841920, guid: 300f80108a63f48618cb4a1c8b8c1e86, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1982611864615202, guid: 300f80108a63f48618cb4a1c8b8c1e86, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4643521465287934, guid: 300f80108a63f48618cb4a1c8b8c1e86, type: 3}
       propertyPath: m_LocalScale.x
       value: 7
@@ -1147,7 +1155,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4643521465287934, guid: 300f80108a63f48618cb4a1c8b8c1e86, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7
+      value: 8.5
       objectReference: {fileID: 0}
     - target: {fileID: 4643521465287934, guid: 300f80108a63f48618cb4a1c8b8c1e86, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1483,8 +1491,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5001402672796389843, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
+      propertyPath: viscosity
+      value: 0.000001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5001402672796389843, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
       propertyPath: diffuseColor
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5001402672796389843, guid: 8bc7a160521fbe54a95d0e47f062f435, type: 3}
       propertyPath: colliders.Array.data[0]

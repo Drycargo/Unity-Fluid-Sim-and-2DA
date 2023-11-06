@@ -259,10 +259,12 @@ public class TDAFluidScript : MonoBehaviour
         capturedShader.SetTexture(potentialUpdateKernel, "InputPotential", potentialRT1);
         capturedShader.SetTexture(potentialUpdateKernel, "OutputPotential", potentialRT0);
 
-        // Vel1 --Force--> Vel2
+        // Vel1 + capturedTex --Force--> Vel2
         currentShader.SetTexture(forceKernel, "AdvectOutSrc", velRT1);
         currentShader.SetTexture(forceKernel, "AdvectOutDest", velRT2);
         currentShader.SetTexture(forceKernel, "Potential", potentialRT0);
+        currentShader.SetTexture(forceKernel, "CapturedTex", capturedTex);
+        currentShader.SetVector("forceRange", new Vector2(0.25f, 1));
 
         // Vel2 --Curl--> vCurl0
         currentShader.SetTexture(curlKernel, "AdvectOutSrc", velRT2);
@@ -289,11 +291,10 @@ public class TDAFluidScript : MonoBehaviour
         currentShader.SetTexture(projectKernel, "VelDest", velRT0);
 
         currentShader.SetFloat("CURL", vorticity);
-        currentShader.SetFloat("FORCE_DECAY", 75);
-        currentShader.SetFloat("FORCE_AMPLITUDE", 2.5f);
+        currentShader.SetFloat("FORCE_AMPLITUDE", 50f);
 
-        capturedShader.SetInt("sampleStep", 1);
-        capturedShader.SetInt("sampleRadius", 2);
+        capturedShader.SetInt("sampleStep", 2);
+        capturedShader.SetInt("sampleRadius", 4);
         capturedShader.SetFloat("transparencyThreshold", 0.0000001f);
         capturedShader.SetVector("potentialIncrementRange", new Vector2(0.6f, 1.0f));
         capturedShader.SetFloat("potentialDecay", 0.8f);

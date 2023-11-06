@@ -27,8 +27,9 @@ void BlurPotential(uint2 id : SV_DispatchThreadID)
 
     for (int i = -sampleRadius; i <= sampleRadius; i+= sampleStep) {
         for (int j = -sampleRadius; j <= sampleRadius; j+= sampleStep) {
+            uint step = (uint)sampleStep;
             newPotential += 
-                GAUSSIAN_BLUR[abs(i) + abs(j) * (2 * sampleRadius + 1)] * InputPotential[id + int2(i, j)];
+                GAUSSIAN_BLUR[abs(i)/step + abs(j)/step * (2 * sampleRadius + 1)] * InputPotential[id + int2(i, j)];
         }
     }
 
@@ -62,7 +63,11 @@ void AdvectAndUpdatePotential(uint2 id : SV_DispatchThreadID)
     
     float4 capturedColor = ColorTex[((float2)id) / outputDim * inputDim];
     if (capturedColor.a > transparencyThreshold) {
+        /*
         float brightness = 0.3 * capturedColor.r + 0.6 * capturedColor.g + capturedColor.b * 0.1;
         OutputPotential[id] += lerp(potentialIncrementRange[0], potentialIncrementRange[1], brightness);
+        */
+        //OutputPotential[id] += 1 / (abs(OutputPotential[id]) + 1);
+        OutputPotential[id] = 1;
     }
 }
